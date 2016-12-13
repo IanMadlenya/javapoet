@@ -2136,6 +2136,39 @@ public final class TypeSpecTest {
         + "}\n");
   }
 
+  @Test public void staticCodeBlockOnInterface() {
+    TypeSpec taco = TypeSpec.interfaceBuilder("ITaco")
+        .addField(String.class, "FOO", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+        .addStaticBlock(CodeBlock.builder()
+            .addStatement("FOO = $S", "FOO")
+            .build())
+        .addMethod(MethodSpec.methodBuilder("getFoo")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(String.class)
+            .addCode("return FOO;\n")
+            .build())
+        .build();
+    assertThat(toString(taco)).isEqualTo(""
+        + "package com.squareup.tacos;\n" +
+            "\n" +
+            "import java.lang.Override;\n" +
+            "import java.lang.String;\n" +
+            "\n" +
+            "interface ITaco {\n" +
+            "  private String FOO;\n" +
+            "\n" +
+            "  static {\n" +
+            "    FOO = \"FOO\";\n" +
+            "  }\n" +
+            "\n" +
+            "  @Override\n" +
+            "  static String getFoo() {\n" +
+            "    return FOO;\n" +
+            "  }\n" +
+            "}\n");
+  }
+
   @Test public void initializerBlockInRightPlace() {
     TypeSpec taco = TypeSpec.classBuilder("Taco")
         .addField(String.class, "foo", Modifier.PRIVATE)
